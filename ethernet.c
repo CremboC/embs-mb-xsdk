@@ -58,6 +58,7 @@ void request_world(int size, int world_id) {
 	message.rqw = req;
 	message.length = sizeof(request_world_t);
 
+	XEmacLite_FlushReceive(&ether); // clears incoming messages buffer
 	send_frame();
 }
 
