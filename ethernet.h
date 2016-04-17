@@ -51,7 +51,6 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
 	eth_header_t eth_header;
-	u8 type;
 	u8 answer; // 0 correct, 1 too long, 2 too short
 } solution_reply_t;
 

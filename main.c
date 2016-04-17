@@ -139,13 +139,12 @@ int main (void) {
 			xil_printf("Answer is correct!\r\n");
 			break;
 		case 1:
-			xil_printf("Answer is too short... :(\r\n");
-			break;
-		case 2:
 			xil_printf("Answer is too long... :(\r\n");
 			break;
+		case 2:
+			xil_printf("Answer is too short... :(\r\n");
+			break;
 		}
-
 	}
     return 0;
 }

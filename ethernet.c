@@ -39,6 +39,9 @@ void init_ether() {
     XEmacLite_CfgInitialize(&ether, etherconfig, etherconfig->BaseAddress);
 
     XEmacLite_SetMacAddress(&ether, my_address); // set sending mac address
+    XEmacLite_FlushReceive(&ether);
+    XEmacLite_FlushReceive(&ether);
+    XEmacLite_FlushReceive(&ether);
 }
 
 void request_world(int size, int world_id) {
