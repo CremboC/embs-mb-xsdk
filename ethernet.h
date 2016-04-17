@@ -32,7 +32,7 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
 	eth_header_t eth_header;
-	u32 world_id;
+	u8 world_id[4];
 	u8 width;
 	u8 height;
 	u8 waypoints_size;
@@ -43,10 +43,10 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
 	u8 type;
-	u32 world_id;
+	u8 size;
+	u8 world_id[4];
 	u8 ignore_walls;
 	u32 cost;
-	u8 size;
 } solve_world_t;
 
 typedef struct __attribute__((packed)) {
@@ -60,7 +60,7 @@ void init_ether();
 void request_world();
 int receive_world(reply_world_t **r);
 
-void send_solution(u32 cost, u32 world_id, u8 size);
+void send_solution(int cost, u8 world_id[4], int size);
 int receive_solution_reply(solution_reply_t **r);
 
 #endif /* ETHERNET_H_ */
