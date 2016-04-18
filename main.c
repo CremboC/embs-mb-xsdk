@@ -12,6 +12,17 @@
 #define MEDIUM_WORLD 1
 #define LARGE_WORLD 2
 
+#define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
+#define BYTETOBINARY(byte)  \
+  (byte & 0x80 ? 1 : 0), \
+  (byte & 0x40 ? 1 : 0), \
+  (byte & 0x20 ? 1 : 0), \
+  (byte & 0x10 ? 1 : 0), \
+  (byte & 0x08 ? 1 : 0), \
+  (byte & 0x04 ? 1 : 0), \
+  (byte & 0x02 ? 1 : 0), \
+  (byte & 0x01 ? 1 : 0)
+
 int main (void) {
 	init_vga();
 
@@ -51,6 +62,7 @@ int main (void) {
 		}
 
 		int i;
+		xil_printf("Width: %d\r\n", r->width);
 		draw_grid(r->width);
 
 		// point to end of the reply_world_t struct for the waypoint array
@@ -59,7 +71,9 @@ int main (void) {
 		xil_printf("Waypoints size: %d\r\n", r->waypoints_size);
 
 		for (i = 0; i < r->waypoints_size; i++) {
-			fill_square(waypoints[i].x, waypoints[i].y, GREEN); // draw all waypoints
+			int color = BLUE;
+			if (i == 0) color = GREEN;
+			fill_square(waypoints[i].x, waypoints[i].y, color); // draw all waypoints
 		}
 
 		// point to end of waypoints for the walls size
@@ -89,7 +103,7 @@ int main (void) {
 			data = (data << 8) | walls[i].x;
 
 			putfslx(data, 0, FSL_DEFAULT);
-			xil_printf("Wall %d: %08x\r\n", i, data);
+//			xil_printf("Wall %d: %08x\r\n", i, data);
 		}
 		xil_printf("Sending waypoints size: %d\r\n", r->waypoints_size);
 		// 4. waypoints number
@@ -100,7 +114,7 @@ int main (void) {
 			data = (data << 8) | waypoints[i].x;
 
 			putfslx(data, 0, FSL_DEFAULT);
-			xil_printf("Waypoint %d: %08x\r\n", i, data);
+//			xil_printf("Waypoint %d: %08x\r\n", i, data);
 		}
 		// 6. wait for data back
 
@@ -118,9 +132,7 @@ int main (void) {
 		// 2. loop over path
 		for (i = 0; i < cost + 1; i++) {
 			getfslx(data, 0, FSL_DEFAULT);
-
-			u8 x = (u8) (data & 0xFF);
-			u8 y = (u8) ((data >> 8) & 0xFF);
+			draw_path_square(data & 0xFF, (data >> 8) & 0xFF);
 		}
 
 		xil_printf("Sending solution\r\n");

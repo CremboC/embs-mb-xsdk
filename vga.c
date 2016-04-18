@@ -2,6 +2,7 @@
 
 #define FRAME_BUFFER XPAR_DDR_SDRAM_MPMC_BASEADDR
 #define BLOCK_SIZE 10
+#define PATH_BLOCK_SIZE 4
 
 static u32 buffer;
 
@@ -32,20 +33,23 @@ inline void draw_rect(int x_loc, int y_loc, int width, int height, u8 color) {
     }
 }
 
-inline void draw_horizontal_line(u8 y, u8 end) {
+inline void draw_horizontal_line(int y, int end) {
     int x;
-
 	for (x = 0; x < end; x++) {
 		*((volatile u8 *) FRAME_BUFFER + x + (WIDTH * y)) = BLACK;
 	}
 }
 
-inline void draw_vertical_line(u8 x, u8 end) {
+inline void draw_vertical_line(int x, int end) {
 	draw_rect(x, 0, 1, end, BLACK);
 }
 
 inline void fill_square(u8 x, u8 y, int color) {
 	draw_rect(x * BLOCK_SIZE + 1, y * BLOCK_SIZE + 1, BLOCK_SIZE - 1, BLOCK_SIZE - 1, color);
+}
+
+inline void draw_path_square(u8 x, u8 y) {
+	draw_rect(x * BLOCK_SIZE + 4, y * BLOCK_SIZE + 4, PATH_BLOCK_SIZE - 1, PATH_BLOCK_SIZE - 1, RED);
 }
 
 void draw_wall(u8 x, u8 y, u8 direction, u8 length, u8 world_size) {
@@ -54,14 +58,14 @@ void draw_wall(u8 x, u8 y, u8 direction, u8 length, u8 world_size) {
 	case 0: // horizontal
 		for (i = 0; i < length; i++) {
 			if (x + i < world_size) {
-				fill_square(x + i, y, RED);
+				fill_square(x + i, y, BLACK);
 			}
 		}
 		break;
 	case 1: // vertical
 		for (i = 0; i < length; i++) {
 			if (y + i < world_size) {
-				fill_square(x, y + i, RED);
+				fill_square(x, y + i, BLACK);
 			}
 		}
 		break;

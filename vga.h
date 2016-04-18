@@ -27,9 +27,10 @@
 void init_vga();
 void reset_screen();
 void draw_rect(int x_loc, int y_loc, int width, int height, u8 colour);
-void draw_horizontal_line(u8 y, u8 end);
-void draw_vertical_line(u8 x, u8 end);
+void draw_horizontal_line(int y, int end);
+void draw_vertical_line(int x, int end);
 void fill_square(u8 x, u8 y, int color);
+void draw_path_square(u8 x, u8 y);
 void draw_wall(u8 x, u8 y, u8 direction, u8 length, u8 world_size);
 void draw_grid(int size);
 
