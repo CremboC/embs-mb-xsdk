@@ -12,17 +12,6 @@
 #define MEDIUM_WORLD 1
 #define LARGE_WORLD 2
 
-#define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
-#define BYTETOBINARY(byte)  \
-  (byte & 0x80 ? 1 : 0), \
-  (byte & 0x40 ? 1 : 0), \
-  (byte & 0x20 ? 1 : 0), \
-  (byte & 0x10 ? 1 : 0), \
-  (byte & 0x08 ? 1 : 0), \
-  (byte & 0x04 ? 1 : 0), \
-  (byte & 0x02 ? 1 : 0), \
-  (byte & 0x01 ? 1 : 0)
-
 int main (void) {
 	init_vga();
 
@@ -53,7 +42,9 @@ int main (void) {
 		id = atoi(id_a);
 		xil_printf(" accepted: %d\r\n", id);
 
+		reset_screen();
 		request_world(world_size, id);
+
 		u32 data;
 		int status;
 		for (;;) {
@@ -75,7 +66,6 @@ int main (void) {
 			if (i == 0) color = GREEN;
 			fill_square(waypoints[i].x, waypoints[i].y, color); // draw all waypoints
 		}
-
 		// point to end of waypoints for the walls size
 		u8 *walls_size_ptr = (void *) (waypoints + r->waypoints_size);
 		u8 walls_size = *walls_size_ptr;
@@ -85,14 +75,20 @@ int main (void) {
 		// point to end of walls size for walls array
 		wall_t *walls = (void *) (walls_size_ptr + 1);
 
+		for (i = 0; i < walls_size; i++) {
+			draw_wall(walls[i].x, walls[i].y, walls[i].direction, walls[i].length, r->width); // draw all walls
+		}
+
 		// send data to hardware to solve world
 		// order is:
 		// 1. world size
 		xil_printf("Sending world size: %d\r\n", r->width);
 		putfslx(r->width, 0, FSL_DEFAULT);
+
 		// 2. walls number
 		xil_printf("Sending walls size: %d\r\n", walls_size);
 		putfslx(walls_size, 0, FSL_DEFAULT);
+
 		// 3. walls
 		xil_printf("Sending walls\r\n");
 		for (i = 0; i < walls_size; i++) {
@@ -103,25 +99,21 @@ int main (void) {
 			data = (data << 8) | walls[i].x;
 
 			putfslx(data, 0, FSL_DEFAULT);
-//			xil_printf("Wall %d: %08x\r\n", i, data);
 		}
 		xil_printf("Sending waypoints size: %d\r\n", r->waypoints_size);
+
 		// 4. waypoints number
 		putfslx(r->waypoints_size, 0, FSL_DEFAULT);
+
 		// 5. waypoints
 		for (i = 0; i < r->waypoints_size; i++) {
 			data = waypoints[i].y;
 			data = (data << 8) | waypoints[i].x;
 
 			putfslx(data, 0, FSL_DEFAULT);
-//			xil_printf("Waypoint %d: %08x\r\n", i, data);
 		}
+
 		// 6. wait for data back
-
-		for (i = 0; i < walls_size; i++) {
-			draw_wall(walls[i].x, walls[i].y, walls[i].direction, walls[i].length, r->width); // draw all walls
-		}
-
 		xil_printf("Waiting for results back\r\n");
 
 		// reading results:
@@ -129,6 +121,7 @@ int main (void) {
 		u32 cost;
 		getfslx(cost, 0, FSL_DEFAULT);
 		xil_printf("Got cost: %d\r\n", cost);
+
 		// 2. loop over path
 		for (i = 0; i < cost + 1; i++) {
 			getfslx(data, 0, FSL_DEFAULT);
