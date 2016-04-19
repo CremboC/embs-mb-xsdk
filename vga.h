@@ -33,5 +33,6 @@ void fill_square(u8 x, u8 y, int color);
 void draw_path_square(u8 x, u8 y);
 void draw_wall(u8 x, u8 y, u8 direction, u8 length, u8 world_size);
 void draw_grid(int size);
+void draw_answer(u8 answer);
 
 #endif /* VGA_H_ */

@@ -13,13 +13,12 @@
 #define LARGE_WORLD 2
 
 int main (void) {
-	init_vga();
+	init_vga(); // Initialise VGA
 
 	for (;;) {
-		init_ether();
+		init_ether(); // Initialise ethernet
 
 		char in = '\0';
-		reply_world_t *r;
 		int world_size, id;
 
 		xil_printf("\r\nEnter the size (0 for small, 1 for medium, 2 for large): ");
@@ -33,6 +32,7 @@ int main (void) {
 		in = XUartLite_RecvByte(XPAR_RS232_DTE_BASEADDR);
 		for (; in != '\r'; in = XUartLite_RecvByte(XPAR_RS232_DTE_BASEADDR)) {
 			if (in >= 0x30 && in <= 0x39) {
+				xil_printf("%d", in - '0');
 				id_a[pos++] = in;
 			} else if (in == 0x0A) {
 				break;
@@ -45,6 +45,7 @@ int main (void) {
 		reset_screen();
 		request_world(world_size, id);
 
+		reply_world_t *r;
 		u32 data;
 		int status;
 		for (;;) {
@@ -150,6 +151,8 @@ int main (void) {
 			xil_printf("Answer is too short... :(\r\n");
 			break;
 		}
+
+		draw_answer(sr->answer);
 	}
     return 0;
 }
