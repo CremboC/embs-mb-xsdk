@@ -1,3 +1,5 @@
+// Exam number: Y0001392
+
 #include "vga.h"
 
 #define FRAME_BUFFER XPAR_DDR_SDRAM_MPMC_BASEADDR

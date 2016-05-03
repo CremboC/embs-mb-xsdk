@@ -1,3 +1,5 @@
+// Exam number: Y0001392
+
 #include "ethernet.h"
 
 #define TMIT_HEADER_SIZE 14
@@ -76,11 +78,13 @@ void send_solution(int cost, u8 *world_id, int size) {
 
 	req.type = SOLVE_WORLD;
 	req.size = size;
+
+	// copy world id into request struct
 	int i;
 	for (i = 0; i < 4; i++)
 		req.world_id[i] = world_id[i];
 
-	req.ignore_walls = 0;
+	req.ignore_walls = 0; // always don't ignore walls
 	req.cost = cost;
 
 	message.type = SOLVE_WORLD;
@@ -101,14 +105,18 @@ int receive_world(reply_world_t **r) {
 	volatile int recv_len = 0;
     recv_len = XEmacLite_Recv(&ether, recv_buffer);
 
+    // if we didn't receive anything just return
     if (recv_len == 0) {
     	return -1;
     }
 
+    // we expect a message of ethernet type 0x55AB and just to make sure, only accept it
+    // if it is a reply to our world request
     if (eth_header->type != 0x55AB || eth_header->reply_type != REPLY_WORLD) {
     	return -1;
     }
 
+    // input parameter now points to the receive buffer so the parameters can be access easily
 	*r = (void *) recv_buffer;
 	return 1;
 }
@@ -124,14 +132,18 @@ int receive_solution_reply(solution_reply_t **r) {
 	volatile int recv_len = 0;
     recv_len = XEmacLite_Recv(&ether, recv_buffer);
 
+    // if we didn't receive anything just return
     if (recv_len == 0) {
     	return -1;
     }
 
+    // we expect a message of ethernet type 0x55AB and just to make sure, only accept it
+    // if it is a reply to our sent solution
     if (eth_header->type != 0x55AB || eth_header->reply_type != SOLUTION_REPLY) {
     	return -1;
     }
 
+    // input parameter now points to the receive buffer so the parameters can be access easily
     *r = (void *) recv_buffer;
 	return 1;
 }
@@ -141,35 +153,41 @@ int receive_solution_reply(solution_reply_t **r) {
  */
 void send_frame() {
 	int i = 0;
+	// overwrite whatever was in the buffer 0 to make sure no junk is sent
 	memset(tmit_buffer, 0, sizeof(tmit_buffer));
 	u8 *buffer = tmit_buffer;
 
-    for(i = 0; i < 6; i++)
+
+    for(i = 0; i < 6; i++) // copy target address
         *buffer++ = target_address[i];
 
-    for(i = 0; i < 6; i++)
+    for(i = 0; i < 6; i++) // copy my address
         *buffer++ = my_address[i];
 
-    for(i = 0; i < 2; i++)
+    for(i = 0; i < 2; i++) // copy the type (0x55AB)
         *buffer++ = type[i];
 
+    // depending whether we're request a world or sending the solution
     switch (message.type) {
     case REQUEST_WORLD: // request_world
     	*buffer++ = message.rqw.type;
     	*buffer++ = message.rqw.size;
 
-    	memcpy(buffer, &message.rqw.world_id, 4);
+    	memcpy(buffer, &message.rqw.world_id, 4); // copy the world id into the buffer
 
     	break;
     case SOLVE_WORLD: // solve_world:
     	*buffer++ = message.sw.type;
     	*buffer++ = message.sw.size;
 
+    	// copy the world id into the buffer
     	for (i = 0; i < 4; i++) {
     		*buffer++ = message.sw.world_id[i];
     	}
 
     	*buffer++ = message.sw.ignore_walls;
+
+    	// copy the cost into the buffer
     	memcpy(buffer, &message.sw.cost, sizeof(u32));
 
     	break;

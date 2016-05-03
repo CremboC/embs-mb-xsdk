@@ -1,9 +1,4 @@
-/*
- * vga.h
- *
- *  Created on: 12 Apr 2016
- *      Author: pi514
- */
+// Exam number: Y0001392
 
 #ifndef VGA_H_
 #define VGA_H_

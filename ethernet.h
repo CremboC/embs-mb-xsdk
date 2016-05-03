@@ -1,9 +1,4 @@
-/*
- * ethernet.h
- *
- *  Created on: 11 Apr 2016
- *      Author: pi514
- */
+// Exam number: Y0001392
 
 #ifndef ETHERNET_H_
 #define ETHERNET_H_
